@@ -64,7 +64,7 @@ const resolveReport = async (req, res) => {
     report.resolvedImageUrl = resolvedImageUrl;
     await report.save();
 
-    // 🔔 (We'll add notification later)
+    
     res.status(200).json({ message: 'Report marked as resolved', report });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
