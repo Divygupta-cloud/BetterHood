@@ -12,7 +12,7 @@ require("./config/firebase");
 
 const reportRoutes = require("./routes/reportRoutes");
 const userRoutes = require("./routes/userRoutes");
-const verifyFirebaseToken = require("./middlewares/firebaseAuthMiddleware");
+const verifyFirebaseToken = require('./middlewares/firebaseAuthMiddleware');
 const errorHandler = require("./middlewares/errorHandler");
 const checkEnv = require("./config/checkEnv");
 

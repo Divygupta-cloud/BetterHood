@@ -7,15 +7,14 @@ import {
   Box,
   CircularProgress,
   Alert,
-  Button,
-  Link
+  Button
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const UserDashboard = () => {
-  const { currentUser, userData, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userDataState, setUserData] = useState(null);
@@ -30,10 +29,7 @@ const UserDashboard = () => {
       }
 
       try {
-        console.log('Fetching user data for:', currentUser.uid);
         const token = await currentUser.getIdToken();
-        
-        // First try to get the user
         const response = await fetch(`${API_URL}/users/${currentUser.uid}`, {
           credentials: 'include',
           headers: {
@@ -43,8 +39,6 @@ const UserDashboard = () => {
 
         if (!response.ok) {
           if (response.status === 404) {
-            // If user doesn't exist, create them
-            console.log('User not found, creating new user');
             const createResponse = await fetch(`${API_URL}/users`, {
               method: 'POST',
               headers: {
@@ -61,23 +55,19 @@ const UserDashboard = () => {
               credentials: 'include'
             });
 
-            if (!createResponse.ok) {
-              throw new Error('Failed to create user profile');
-            }
-            
+            if (!createResponse.ok) throw new Error('Failed to create user profile');
             const userData = await createResponse.json();
             setUserData(userData);
           } else {
             const errorText = await response.text();
-            console.error('Failed to fetch user data:', errorText);
-            throw new Error('Failed to fetch user data');
+            throw new Error('Failed to fetch user data: ' + errorText);
           }
         } else {
           const userData = await response.json();
           setUserData(userData);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error(error);
         setError('Failed to load user data. Please try refreshing the page.');
       } finally {
         setLoading(false);
@@ -92,24 +82,30 @@ const UserDashboard = () => {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
-      setError('Failed to sign out');
+      console.error('Sign out error:', error);
+      setError('Failed to sign out.');
     }
   };
 
   if (loading) {
     return (
-      <Container maxWidth="md">
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-          <CircularProgress />
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          background: 'linear-gradient(145deg, #0f0f0f, #1c1c1c)',
+        }}
+      >
+        <CircularProgress color="primary" />
+      </Box>
     );
   }
 
   const ErrorDisplay = () => (
-    <Alert 
-      severity="error" 
+    <Alert
+      severity="error"
       sx={{ mt: 4 }}
       action={
         <Button color="inherit" size="small" onClick={() => window.location.reload()}>
@@ -122,43 +118,97 @@ const UserDashboard = () => {
   );
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ mt: 4 }}>
-        <Paper elevation={3} sx={{ p: 4 }}>
-          {error ? <ErrorDisplay /> : (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(120deg, #121212, #1e1e1e)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+      }}
+    >
+      <Box sx={{ width: '100%', maxWidth: 600 }}>
+        <Paper
+          elevation={10}
+          sx={{
+            p: 5,
+            borderRadius: 4,
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(14px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.7)',
+          }}
+        >
+          {error ? (
+            <ErrorDisplay />
+          ) : (
             <>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4" gutterBottom>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3}
+              >
+                <Typography variant="h4" fontWeight="bold">
                   Welcome, {userDataState?.name || currentUser?.displayName || 'User'}!
                 </Typography>
-                <Button variant="outlined" color="primary" onClick={handleSignOut}>
+                <Button
+                  onClick={handleSignOut}
+                  variant="outlined"
+                  sx={{
+                    borderColor: '#888',
+                    color: '#ccc',
+                    '&:hover': {
+                      borderColor: '#fff',
+                      color: '#fff',
+                    },
+                  }}
+                >
                   Sign Out
                 </Button>
               </Box>
-              
-              <Typography variant="body1" paragraph>
-                Email: {userDataState?.email || currentUser?.email}
+
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Email:</strong> {userDataState?.email || currentUser?.email}
               </Typography>
-              
-              <Typography variant="body1" paragraph>
-                Role: {userDataState?.role || 'User'}
+              <Typography variant="body1" sx={{ mb: 4 }}>
+                <strong>Role:</strong> {userDataState?.role || 'User'}
               </Typography>
 
-              <Box mt={4}>
-                <Typography variant="h6" gutterBottom>
-                  Quick Actions
-                </Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Quick Actions
+              </Typography>
+              <Box display="flex" gap={2} flexWrap="wrap">
                 <Button
                   variant="contained"
-                  color="primary"
-                  sx={{ mr: 2 }}
+                  sx={{
+                    background: 'linear-gradient(to right, #00c6ff, #0072ff)',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    borderRadius: 2,
+                    px: 3,
+                    '&:hover': {
+                      background: 'linear-gradient(to right, #0072ff, #00c6ff)',
+                    },
+                  }}
                   onClick={() => navigate('/create-report')}
                 >
                   Create Report
                 </Button>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  sx={{
+                    background: 'linear-gradient(to right, #ff416c, #ff4b2b)',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    borderRadius: 2,
+                    px: 3,
+                    '&:hover': {
+                      background: 'linear-gradient(to right, #ff4b2b, #ff416c)',
+                    },
+                  }}
                   onClick={() => navigate('/my-reports')}
                 >
                   My Reports
@@ -168,8 +218,8 @@ const UserDashboard = () => {
           )}
         </Paper>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
-export default UserDashboard; 
+export default UserDashboard;
