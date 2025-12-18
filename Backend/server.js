@@ -46,7 +46,10 @@ app.use((req, res, next) => {
 });
 
 // Database connection with better error handling
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => {
     console.log("Connected to MongoDB");
   })

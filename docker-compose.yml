@@ -1,0 +1,32 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: betterhood-mongo
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: betterhood-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/betterhood
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    container_name: betterhood-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
