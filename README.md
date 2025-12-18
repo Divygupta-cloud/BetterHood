@@ -10,6 +10,7 @@ A full-stack MERN application for reporting urban issues.
 
 ## Run Locally (Docker)
 ```bash
+git clone https://github.com/Divygupta-cloud/BetterHood.git
 docker compose up --build
 
 Frontend: http://localhost:3000
